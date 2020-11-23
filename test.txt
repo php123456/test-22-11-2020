@@ -1,0 +1,150 @@
+ЗАДАЧА #1 (ООП)
+
+<?php
+
+/**
+* Класс Item
+*
+* @author Алексей <aleksei_bocharov@mail.ru>
+* @final
+* @version 1.0
+* @package files
+*/
+final class Item {
+
+	/** @var integer $id */
+	private $id;
+	/** @var string $name */
+	private $name;
+	/** @var integer $status */
+	private $status;
+	/** @var boolean $changed */
+	private $changed;
+
+	/**
+	* @var integer $init_v
+	* @static
+	*/
+	private static $init_v;
+	/**
+	* Свойство класса для работы с базой данных
+	*
+	* @var object $mysqli
+	*/
+	private $mysqli;
+
+	/**
+	* Метод __construct
+	*
+	* @return void
+	*/
+	public function __construct($id) {
+
+    	$this->id = $id;
+    	$this->init();
+	}
+
+	/**
+	* Метод init
+	*
+	* @return void
+	*/
+    private function init() {
+
+        if (self::$init_v === null) {
+
+            self::$init_v = 1;
+
+            $query = "SELECT `name`, `status` FROM `objects` WHERE `id`='".$this->id."'";
+
+			if ($result = $this->mysqli->query($query)) {
+
+				$row = $result->fetch_array(MYSQLI_ASSOC);
+
+				$this->name = $row["name"];
+				$this->status = $row["status"];
+
+			    $result->close();
+			}
+        }
+    }
+
+	/**
+	* Метод __get
+	*
+	* Позволяет получить приватные свойства класска
+	*
+	* @return mixed запрашиваемое свойство
+	*/
+	public function __get($property)
+	{
+		if (property_exists($this, $property)) {
+			return $this->$property;
+		}
+	}
+
+	/**
+	* Метод __set
+	*
+	* Позволяет изменять приватные свойства класска $name и $status
+	*
+	* @return void
+	*/
+	public function __set($property, $value)
+	{
+		if(
+		(($property == "name" && gettype($value) == "string") ||
+		($property == "status" && gettype($value) == "integer")) &&
+		property_exists($this, $property) && trim($value) !== ""
+		)
+        {
+    		$this->$property = $value;
+    		$this->changed = true;
+		}
+	}
+
+	/**
+	* Метод __save
+	*
+	* Сохраняет установленные значения name и status в случае,
+	* если свойства объекта были изменены извне
+	*
+	* @return int результат выполнения запроса
+	*/
+	public function save()
+	{
+		if($this->changed === true)
+        {
+	   		if( !$this->mysqli->query("UPDATE `objects` SET `name`='".$this->name."',
+	   		`status`='".$this->status."' WHERE `id`='".$this->id."'") )
+            	return -1;
+
+            return 1;
+ 		}
+
+ 		return 0;
+	}
+
+}
+
+
+ЗАДАЧА #2 (SQL ЗАПРОСЫ)
+
+SELECT us.*
+FROM `users` as us
+JOIN `objects` as obj ON us.`object_id` = obj.`id`
+
+
+ЗАДАЧА #3 (JQUERY)
+
+<script src="https://code.jquery.com/jquery-latest.min.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){
+	$(document).on('keydown', function (e) {
+		if(e.key == 'ArrowUp' || e.key == 'ArrowDown'
+		|| e.key == 'ArrowLeft' || e.key == 'ArrowRight')
+			alert(e.key);
+	});
+});
+</script>
